@@ -17,7 +17,7 @@ import { Event } from './entities/event.entity';
 import { Location } from 'src/location/entities/location.entity';
 import { LocationService } from 'src/location/location.service';
 import { UsersService } from 'src/users/users.service';
-// import { EventsGateway } from './events.gateway';
+import { EventGateway } from './event.gateway';
 
 @Injectable()
 export class EventService {
@@ -26,7 +26,7 @@ export class EventService {
     private eventRepository: Repository<Event>,
     private usersService: UsersService,
     private locationService: LocationService,
-    // private eventsGateway: EventsGateway
+    private eventGateway: EventGateway,
   ) {}
 
   private async handleLocation(
@@ -102,7 +102,9 @@ export class EventService {
       location,
     });
     await this.eventRepository.save(event);
-    // this.eventsGateway.emitEventChange('create');
+
+    this.eventGateway.emitEvent('create', event);
+
     return event;
   }
 
@@ -188,7 +190,9 @@ export class EventService {
     }
 
     await this.eventRepository.save(event);
-    // this.eventsGateway.emitEventChange('update');
+
+    this.eventGateway.emitEvent('update', event);
+
     return event;
   }
 
@@ -199,11 +203,11 @@ export class EventService {
 
     for (const event of expiredEvents) {
       await this.remove(event.id);
+      this.eventGateway.emitEvent('delete', event);
     }
   }
 
   private async remove(id: string): Promise<void> {
     await this.eventRepository.delete(id);
-    // this.eventsGateway.emitEventChange('delete');
   }
 }

@@ -9,6 +9,7 @@ import { EVENT_QUEUE, EventSchedulerService } from './event-scheduler.service';
 import { EventProcessor } from './event.processor';
 import { BullModule } from '@nestjs/bull';
 import { ConfigService } from '@nestjs/config';
+import { EventGateway } from './event.gateway';
 
 @Module({
   imports: [
@@ -31,6 +32,7 @@ import { ConfigService } from '@nestjs/config';
     EventService,
     EventSchedulerService,
     EventProcessor,
+    EventGateway,
   ],
 })
 export class EventModule {}
