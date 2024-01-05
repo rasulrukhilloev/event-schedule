@@ -31,7 +31,6 @@ import { LocationModule } from './location/location.module';
         database: configService.get<string>('PG_DB'),
         entities: [__dirname + '/**/*.entity{.ts,.js}'],
         synchronize: true,
-        // logging: true,
       }),
       inject: [ConfigService],
     }),

@@ -45,10 +45,8 @@ export class EventService {
   }
 
   async findEvents(filter: EventFilterInput): Promise<Event[]> {
-    // Start creating a query
     const query = this.eventRepository.createQueryBuilder('event');
 
-    // Add conditions based on the filter
     if (filter.startDate) {
       query.andWhere('event.startDate >= :startDate', {
         startDate: filter.startDate,
