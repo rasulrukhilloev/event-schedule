@@ -5,11 +5,12 @@ import { Event } from './entities/event.entity';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { LocationModule } from 'src/location/location.module';
 import { UsersModule } from 'src/users/users.module';
-import { EVENT_QUEUE, EventSchedulerService } from './event-scheduler.service';
+import { EVENT_QUEUE } from './constants/constants';
 import { EventProcessor } from './event.processor';
 import { BullModule } from '@nestjs/bull';
 import { ConfigService } from '@nestjs/config';
 import { EventGateway } from './event.gateway';
+import { EventSchedulerService } from './event-scheduler.service';
 
 @Module({
   imports: [

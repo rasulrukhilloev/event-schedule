@@ -1,15 +1,24 @@
 version: '3.8'
 services:
+  app:
+    build: .
+    ports:
+      - '3000:3000'
+    env_file:
+      - .env
+    volumes:
+      - /Users/RassRukh/Desktop/event-app:/usr/src/app
+      - /usr/src/app/node_modules
+    depends_on:
+      - db
+      - redis
+
   db:
     image: postgres
     env_file:
       - .env
     ports:
       - '5432:5432'
-    # environment:
-    #   POSTGRES_USER: postgres
-    #   POSTGRES_PASSWORD: postgres
-    #   POSTGRES_DB: event
     volumes:
       - postgres-data:/var/lib/postgresql/data
 

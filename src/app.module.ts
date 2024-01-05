@@ -7,7 +7,7 @@ import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { join } from 'path';
 import { AuthModule } from './auth/auth.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { EventModule } from './event/event.module';
 import { LocationModule } from './location/location.module';
 
@@ -21,17 +21,19 @@ import { LocationModule } from './location/location.module';
       driver: ApolloDriver,
       autoSchemaFile: join(process.cwd(), 'src/schema.gql'),
     }),
-    // TODO move to separate databaseService
-    TypeOrmModule.forRoot({
-      // TODO use Joi to validate env_vars
-      type: process.env.DB_TYPE as any,
-      host: process.env.PG_HOST,
-      port: parseInt(process.env.PG_PORT),
-      username: process.env.POSTGRES_USER,
-      password: process.env.POSTGRES_PASSWORD,
-      database: process.env.PG_DB,
-      entities: [__dirname + '/**/*.entity{.ts,.js}'],
-      synchronize: true,
+    TypeOrmModule.forRootAsync({
+      useFactory: async (configService: ConfigService) => ({
+        type: configService.get('DB_TYPE') as any,
+        host: configService.get<string>('PG_HOST'),
+        port: parseInt(configService.get<string>('PG_PORT')),
+        username: configService.get<string>('POSTGRES_USER'),
+        password: configService.get<string>('POSTGRES_PASSWORD'),
+        database: configService.get<string>('PG_DB'),
+        entities: [__dirname + '/**/*.entity{.ts,.js}'],
+        synchronize: true,
+        // logging: true,
+      }),
+      inject: [ConfigService],
     }),
     AuthModule,
     EventModule,

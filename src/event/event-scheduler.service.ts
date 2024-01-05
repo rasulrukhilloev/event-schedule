@@ -1,17 +1,11 @@
 import { Injectable, OnModuleInit } from '@nestjs/common';
 import { InjectQueue } from '@nestjs/bull';
 import { Queue } from 'bull';
-import { EventService } from './event.service';
-
-export const EVENT_QUEUE = 'event-queue';
-export const CHECK_EXPIRED_EVENTS_JOB = 'check-expired-events';
+import { CHECK_EXPIRED_EVENTS_JOB, EVENT_QUEUE } from './constants/constants';
 
 @Injectable()
 export class EventSchedulerService implements OnModuleInit {
-  constructor(
-    @InjectQueue(EVENT_QUEUE) private eventQueue: Queue,
-    private eventService: EventService,
-  ) {}
+  constructor(@InjectQueue(EVENT_QUEUE) private eventQueue: Queue) {}
 
   onModuleInit() {
     this.scheduleExpiredEventCheck();
@@ -22,7 +16,7 @@ export class EventSchedulerService implements OnModuleInit {
       CHECK_EXPIRED_EVENTS_JOB,
       {},
       {
-        repeat: { cron: '*/30 * * * * *' },
+        repeat: { cron: '0 * * * * *' },
       },
     );
   }

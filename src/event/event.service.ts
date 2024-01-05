@@ -5,19 +5,14 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import {
-  Repository,
-  FindOptionsWhere,
-  MoreThanOrEqual,
-  LessThanOrEqual,
-  LessThan,
-} from 'typeorm';
+import { Repository, LessThan } from 'typeorm';
 import { CreateEventInput, UpdateEventInput, EventFilterInput } from './dto';
 import { Event } from './entities/event.entity';
 import { Location } from 'src/location/entities/location.entity';
 import { LocationService } from 'src/location/location.service';
 import { UsersService } from 'src/users/users.service';
 import { EventGateway } from './event.gateway';
+import { EVENT_TYPE } from './constants/constants';
 
 @Injectable()
 export class EventService {
@@ -50,24 +45,34 @@ export class EventService {
   }
 
   async findEvents(filter: EventFilterInput): Promise<Event[]> {
-    let where: FindOptionsWhere<Event> = {};
+    // Start creating a query
+    const query = this.eventRepository.createQueryBuilder('event');
 
+    // Add conditions based on the filter
     if (filter.startDate) {
-      where = { ...where, startDate: MoreThanOrEqual(filter.startDate) };
+      query.andWhere('event.startDate >= :startDate', {
+        startDate: filter.startDate,
+      });
     }
 
     if (filter.endDate) {
-      where = { ...where, endDate: LessThanOrEqual(filter.endDate) };
+      query.andWhere('event.endDate <= :endDate', { endDate: filter.endDate });
     }
 
     if (filter.locationId) {
-      where = { ...where, location: { id: filter.locationId } };
+      query.innerJoinAndSelect(
+        'event.location',
+        'eventLocation',
+        'eventLocation.id = :locationId',
+        { locationId: filter.locationId },
+      );
+    } else {
+      query.leftJoinAndSelect('event.location', 'eventLocation');
     }
 
-    return this.eventRepository.find({
-      where,
-      relations: ['createdBy', 'location'],
-    });
+    query.leftJoinAndSelect('event.createdBy', 'createdBy');
+
+    return query.getMany();
   }
 
   async create(
@@ -103,7 +108,7 @@ export class EventService {
     });
     await this.eventRepository.save(event);
 
-    this.eventGateway.emitEvent('create', event);
+    this.eventGateway.emitEvent(EVENT_TYPE.CREATED, event);
 
     return event;
   }
@@ -115,7 +120,7 @@ export class EventService {
   ): Promise<Event> {
     const event = await this.eventRepository.findOne({
       where: { id: id },
-      relations: ['createdBy', 'location'],
+      relations: ['createdBy'],
     });
     if (!event) {
       throw new NotFoundException('Event not found');
@@ -191,7 +196,7 @@ export class EventService {
 
     await this.eventRepository.save(event);
 
-    this.eventGateway.emitEvent('update', event);
+    this.eventGateway.emitEvent(EVENT_TYPE.UPDATED, event);
 
     return event;
   }
@@ -203,7 +208,7 @@ export class EventService {
 
     for (const event of expiredEvents) {
       await this.remove(event.id);
-      this.eventGateway.emitEvent('delete', event);
+      this.eventGateway.emitEvent(EVENT_TYPE.DELETED, event);
     }
   }
 

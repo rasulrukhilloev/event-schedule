@@ -1,10 +1,7 @@
 import { Process, Processor } from '@nestjs/bull';
 import { Job } from 'bull';
 import { EventService } from './event.service';
-import {
-  CHECK_EXPIRED_EVENTS_JOB,
-  EVENT_QUEUE,
-} from './event-scheduler.service';
+import { CHECK_EXPIRED_EVENTS_JOB, EVENT_QUEUE } from './constants/constants';
 
 @Processor(EVENT_QUEUE)
 export class EventProcessor {

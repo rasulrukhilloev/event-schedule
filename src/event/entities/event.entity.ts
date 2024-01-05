@@ -5,6 +5,7 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  JoinTable,
   ManyToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
@@ -46,6 +47,7 @@ export class Event {
   createdBy: User;
 
   @Field(() => Location)
-  @ManyToOne(() => Location, (location) => location.events)
+  @ManyToOne(() => Location, (location) => location.events, { eager: true })
+  @JoinTable()
   location: Location;
 }
