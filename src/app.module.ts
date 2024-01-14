@@ -1,6 +1,4 @@
 import { Module } from '@nestjs/common';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
 import { UsersModule } from './users/users.module';
 import { GraphQLModule } from '@nestjs/graphql';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
@@ -10,6 +8,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { EventModule } from './event/event.module';
 import { LocationModule } from './location/location.module';
+import { GraphQLError } from 'graphql';
 
 @Module({
   imports: [
@@ -20,6 +19,27 @@ import { LocationModule } from './location/location.module';
     GraphQLModule.forRoot<ApolloDriverConfig>({
       driver: ApolloDriver,
       autoSchemaFile: join(process.cwd(), 'src/schema.gql'),
+      formatError: (error: GraphQLError) => {
+        const originalError = error.extensions?.originalError as
+          | {
+              message?: string;
+              error?: string;
+              statusCode?: number;
+            }
+          | undefined;
+
+        if (originalError) {
+          return {
+            message: originalError.message || error.message,
+            code: originalError.error,
+            statusCode: originalError.statusCode,
+          };
+        }
+
+        return {
+          message: error.message,
+        };
+      },
     }),
     TypeOrmModule.forRootAsync({
       useFactory: async (configService: ConfigService) => ({
@@ -38,7 +58,5 @@ import { LocationModule } from './location/location.module';
     EventModule,
     LocationModule,
   ],
-  controllers: [AppController],
-  providers: [AppService],
 })
 export class AppModule {}
