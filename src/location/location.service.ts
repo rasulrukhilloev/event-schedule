@@ -12,6 +12,9 @@ export class LocationService {
   ) {}
 
   async create(createLocationInput: CreateLocationInput): Promise<Location> {
+    if (await this.findByName(createLocationInput.name)) {
+      throw new Error(`Location ${createLocationInput.name} already exists`);
+    }
     const location = this.locationRepository.create(createLocationInput);
     return this.locationRepository.save(location);
   }
@@ -31,8 +34,8 @@ export class LocationService {
     });
   }
 
-  async findOne(id: string): Promise<Location> {
-    return this.locationRepository.findOne({ where: { id } });
+  async findByName(name: string): Promise<Location> {
+    return this.locationRepository.findOne({ where: { name } });
   }
 
   async remove(id: string): Promise<void> {

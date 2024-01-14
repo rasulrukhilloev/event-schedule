@@ -1,5 +1,5 @@
 import { InputType, Field } from '@nestjs/graphql';
-import { IsDate, IsOptional, IsUUID } from 'class-validator';
+import { IsDate, IsOptional } from 'class-validator';
 
 @InputType()
 export class EventFilterInput {
@@ -13,8 +13,7 @@ export class EventFilterInput {
   @IsOptional()
   endDate?: Date;
 
-  @Field(() => String, { nullable: true })
-  @IsUUID()
+  @Field({ nullable: true })
   @IsOptional()
-  locationId?: string;
+  location?: string;
 }

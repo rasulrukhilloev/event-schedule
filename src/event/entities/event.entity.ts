@@ -46,8 +46,12 @@ export class Event {
   @ManyToOne(() => User, (user) => user.events)
   createdBy: User;
 
-  @Field(() => Location)
-  @ManyToOne(() => Location, (location) => location.events, { eager: true })
+  @Field(() => Location, { nullable: true })
+  @ManyToOne(() => Location, (location) => location.events, {
+    eager: true,
+    nullable: true,
+    onDelete: 'SET NULL',
+  })
   @JoinTable()
   location: Location;
 }

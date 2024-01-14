@@ -13,6 +13,7 @@ import { LocationService } from 'src/location/location.service';
 import { UsersService } from 'src/users/users.service';
 import { EventGateway } from './event.gateway';
 import { EVENT_TYPE } from './constants/constants';
+import { CreateLocationInput } from 'src/location/dto';
 
 @Injectable()
 export class EventService {
@@ -24,28 +25,20 @@ export class EventService {
     private eventGateway: EventGateway,
   ) {}
 
-  private async handleLocation(
-    createOrUpdateEventInput: CreateEventInput | UpdateEventInput,
-  ): Promise<Location> {
-    if (createOrUpdateEventInput.newLocationName) {
-      return await this.locationService.create({
-        name: createOrUpdateEventInput.newLocationName,
-      });
-    } else if (createOrUpdateEventInput.locationId) {
-      const location = await this.locationService.findOne(
-        createOrUpdateEventInput.locationId,
-      );
-      if (!location) {
-        throw new NotFoundException('Location not found');
-      }
-      return location;
-    } else {
-      return null;
-    }
+  private async handleLocation(locationName: string): Promise<Location | null> {
+    const locationObj = await this.locationService.findByName(locationName);
+    if (locationObj) return locationObj;
+
+    const createLocationInput = new CreateLocationInput();
+    createLocationInput.name = locationName;
+    return await this.locationService.create(createLocationInput);
   }
 
   async findEvents(filter: EventFilterInput): Promise<Event[]> {
     const query = this.eventRepository.createQueryBuilder('event');
+
+    query.leftJoinAndSelect('event.location', 'location');
+    query.leftJoinAndSelect('event.createdBy', 'createdBy');
 
     if (filter.startDate) {
       query.andWhere('event.startDate >= :startDate', {
@@ -54,21 +47,18 @@ export class EventService {
     }
 
     if (filter.endDate) {
-      query.andWhere('event.endDate <= :endDate', { endDate: filter.endDate });
+      query.andWhere('event.endDate <= :endDate', {
+        endDate: filter.endDate,
+      });
     }
 
-    if (filter.locationId) {
-      query.innerJoinAndSelect(
-        'event.location',
-        'eventLocation',
-        'eventLocation.id = :locationId',
-        { locationId: filter.locationId },
-      );
-    } else {
-      query.leftJoinAndSelect('event.location', 'eventLocation');
+    if (filter.location) {
+      query.andWhere('location.name = :locationName', {
+        locationName: filter.location,
+      });
     }
 
-    query.leftJoinAndSelect('event.createdBy', 'createdBy');
+    query.orderBy('event.createdAt', 'DESC');
 
     return query.getMany();
   }
@@ -97,13 +87,17 @@ export class EventService {
       );
     }
 
-    const location = await this.handleLocation(createEventInput);
+    let location = null;
+    if (createEventInput.location) {
+      location = await this.handleLocation(createEventInput.location);
+    }
 
     const event = this.eventRepository.create({
       ...createEventInput,
       createdBy: user,
       location,
     });
+
     await this.eventRepository.save(event);
 
     this.eventGateway.emitEvent(EVENT_TYPE.CREATED, event);
@@ -183,14 +177,14 @@ export class EventService {
       );
     }
 
-    const location = await this.handleLocation(updateEventInput);
-    if (location) event.location = location;
-
-    for (const key of Object.keys(updateEventInput)) {
-      if (key !== 'locationId' && key !== 'newLocationName') {
-        event[key] = updateEventInput[key];
-      }
+    if (updateEventInput.location) {
+      const newLocation = await this.handleLocation(updateEventInput.location);
+      event.location = newLocation;
     }
+
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { location, ...updateData } = updateEventInput;
+    Object.assign(event, updateData);
 
     await this.eventRepository.save(event);
 

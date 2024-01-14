@@ -16,7 +16,7 @@ type Event {
   createdAt: DateTime!
   updatedAt: DateTime!
   createdBy: User!
-  location: Location!
+  location: Location
 }
 
 """
@@ -46,7 +46,7 @@ type Query {
 input EventFilterInput {
   startDate: DateTime
   endDate: DateTime
-  locationId: String
+  location: String
 }
 
 type Mutation {
@@ -75,8 +75,7 @@ input CreateEventInput {
   description: String
   startDate: DateTime!
   endDate: DateTime!
-  locationId: String
-  newLocationName: String
+  location: String
 }
 
 input UpdateEventInput {
@@ -84,8 +83,7 @@ input UpdateEventInput {
   description: String
   startDate: DateTime
   endDate: DateTime
-  locationId: String
-  newLocationName: String
+  location: String
 }
 
 input CreateLocationInput {
