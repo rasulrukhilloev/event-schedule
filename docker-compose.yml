@@ -7,7 +7,7 @@ services:
     env_file:
       - .env
     volumes:
-      - /Users/RassRukh/Desktop/event-app:/usr/src/app
+      - ./:/usr/src/app
       - /usr/src/app/node_modules
     depends_on:
       - db
@@ -22,7 +22,6 @@ services:
       - '5432:5432'
     volumes:
       - postgres-data:/var/lib/postgresql/data
-      #./docker-volumes/postgres:/var/lib/mysql TODO (keep organised)
 
   redis:
     image: redis:alpine
