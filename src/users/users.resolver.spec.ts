@@ -37,11 +37,14 @@ describe('UsersResolver', () => {
         name: 'user1',
         password: 'user1pass',
       };
-      const result = new User();
+      const createdUser = {
+        id: '1',
+        ...createUserInput,
+      };
 
-      mockUsersService.create.mockResolvedValue(result);
+      mockUsersService.create.mockResolvedValue(createdUser);
 
-      expect(await resolver.createUser(createUserInput)).toBe(result);
+      expect(await resolver.createUser(createUserInput)).toBe(createdUser);
     });
     it('should handle exceptions', async () => {
       const createUserInput = {

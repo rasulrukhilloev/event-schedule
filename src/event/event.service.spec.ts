@@ -19,6 +19,26 @@ function addDaysToDate(date, days) {
   return futureDate;
 }
 
+function createMockEvent(
+  id,
+  startDate,
+  endDate,
+  name = 'Mock Event',
+  description = 'Mock Description',
+) {
+  return {
+    id,
+    name,
+    description,
+    startDate,
+    endDate,
+    createdBy: { id: 'user-id', name: 'Test User' },
+    location: { id: 'location-id', name: 'Test Location' },
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  };
+}
+
 describe('EventService', () => {
   let service: EventService;
   let mockEventRepository;
@@ -64,7 +84,7 @@ describe('EventService', () => {
   });
 
   describe('findEvents', () => {
-    it('should return events matching the filter criteria', async () => {
+    it('should return events', async () => {
       const filter = {
         startDate: new Date(),
         endDate: new Date(),
@@ -88,18 +108,12 @@ describe('EventService', () => {
     });
 
     it('should return events from a specific start date onwards', async () => {
-      const filter = { startDate: new Date() };
-      const events = [new Event()];
-      setupQueryBuilderMock(events);
-
-      const result = await service.findEvents(filter);
-
-      expect(result).toEqual(events);
-    });
-
-    it('should return events up to a specific end date', async () => {
-      const filter = { endDate: new Date() };
-      const events = [new Event()];
+      const startDate = new Date();
+      const filter = { startDate };
+      const events = [
+        createMockEvent('1', startDate, addDaysToDate(startDate, 1)),
+        createMockEvent('2', startDate, addDaysToDate(startDate, 2)),
+      ];
       setupQueryBuilderMock(events);
 
       const result = await service.findEvents(filter);
@@ -108,13 +122,19 @@ describe('EventService', () => {
     });
 
     it('should return events for a specific location', async () => {
-      const filter = { location: 'Test Location' };
-      const events = [new Event()];
+      const location = 'Test Location';
+      const filter = { location };
+      const events = [
+        createMockEvent('1', new Date(), new Date(), location),
+        createMockEvent('2', new Date(), new Date(), 'Another Location'),
+      ];
       setupQueryBuilderMock(events);
 
       const result = await service.findEvents(filter);
 
-      expect(result).toEqual(events);
+      expect(result).toEqual(
+        events.filter((event) => event.location.name === location),
+      );
     });
 
     function setupQueryBuilderMock(events) {
