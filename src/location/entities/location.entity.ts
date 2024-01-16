@@ -1,5 +1,5 @@
 import { Field, ID, ObjectType } from '@nestjs/graphql';
-import { Event } from 'src/event/entities/event.entity';
+import { Event } from '../../event/entities/event.entity';
 import {
   Column,
   Entity,

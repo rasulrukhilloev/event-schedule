@@ -4,10 +4,10 @@ import { Event } from './entities/event.entity';
 import { CreateEventInput } from './dto/create-event.input';
 import { UpdateEventInput } from './dto/update-event.input';
 import { EventFilterInput } from './dto/event-filter.input';
-import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { UseGuards } from '@nestjs/common';
-import { CurrentUser } from 'src/auth/decorator/current-user.decorator';
-import { User } from 'src/users/entity/users.entity';
+import { CurrentUser } from '../auth/decorator/current-user.decorator';
+import { User } from '../users/entity/users.entity';
 
 @Resolver(() => Event)
 export class EventResolver {

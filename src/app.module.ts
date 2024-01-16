@@ -18,7 +18,7 @@ import { GraphQLError } from 'graphql';
     UsersModule,
     GraphQLModule.forRoot<ApolloDriverConfig>({
       driver: ApolloDriver,
-      autoSchemaFile: join(process.cwd(), 'src/schema.gql'),
+      autoSchemaFile: join(process.cwd(), '../schema.gql'),
       formatError: (error: GraphQLError) => {
         const originalError = error.extensions?.originalError as
           | {

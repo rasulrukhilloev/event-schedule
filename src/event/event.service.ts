@@ -8,12 +8,12 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, LessThan } from 'typeorm';
 import { CreateEventInput, UpdateEventInput, EventFilterInput } from './dto';
 import { Event } from './entities/event.entity';
-import { Location } from 'src/location/entities/location.entity';
-import { LocationService } from 'src/location/location.service';
-import { UsersService } from 'src/users/users.service';
+import { Location } from '../location/entities/location.entity';
+import { LocationService } from '../location/location.service';
+import { UsersService } from '../users/users.service';
 import { EventGateway } from './event.gateway';
 import { EVENT_TYPE } from './constants/constants';
-import { CreateLocationInput } from 'src/location/dto';
+import { CreateLocationInput } from '../location/dto';
 
 @Injectable()
 export class EventService {

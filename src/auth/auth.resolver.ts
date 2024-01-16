@@ -3,7 +3,7 @@ import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { LocalAuthGuard } from './guards/local-auth.guard';
 import { LoginResponse, LoginUserInput } from './dto/login.dto';
 import { AuthService } from './auth.service';
-import { User } from 'src/users/entity/users.entity';
+import { User } from '../users/entity/users.entity';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { CurrentUser } from './decorator/current-user.decorator';
 
